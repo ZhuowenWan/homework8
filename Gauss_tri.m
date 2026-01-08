@@ -296,4 +296,20 @@ switch num_points
         };
         quadrature_schemes.general_groups = {};
 
+for k = 1:3
+    idx = idx + 1;
+    if k == 1
+        qp(idx,:) = [a, b, b];
+    elseif k == 2
+        qp(idx,:) = [b, a, b];
+    else
+        qp(idx,:) = [b, b, a];
+    end
+    qw(idx) = w;
+end
+
+qp(idx+1:idx+3, :) = [a, b, b; b, a, b; b, b, a];
+qw(idx+1:idx+3) = w;
+idx = idx + 3;
+
 end
