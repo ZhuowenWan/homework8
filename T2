@@ -2,8 +2,7 @@ function run_verification_disk()
     
     R = 1.0;  % 半径
     center = [0, 0];
-    
-    % 制造解：u_exact = sin(πr²/R²)
+
     u_exact = @(x,y) sin(pi*(x.^2 + y.^2)/R^2);
     
     [f, g_D, g_N] = compute_manufactured_solution(u_exact, R);
@@ -108,5 +107,57 @@ function compute_convergence_rates(errors)
         
         fprintf('%.4e\t%.4e\t%.2f\t%.4e\t%.2f\n', ...
             errors.h(i), errors.L2(i), rate_L2, errors.H1(i), rate_H1);
+    end
+end
+
+function visualize_solution(u, mesh, title_str)
+   
+    figure('Position', [100, 100, 1200, 400]);
+
+    subplot(1, 3, 1);
+    trisurf(mesh.elements, mesh.nodes(:,1), mesh.nodes(:,2), u);
+    shading interp;
+    colorbar;
+    title([title_str, ' - Surface']);
+    xlabel('x'); ylabel('y');
+    view(30, 30);
+
+    subplot(1, 3, 2);
+    tricontour(mesh.elements, mesh.nodes(:,1), mesh.nodes(:,2), u, 20);
+    colorbar;
+    title([title_str, ' - Contour']);
+    xlabel('x'); ylabel('y');
+    axis equal;
+
+    subplot(1, 3, 3);
+    triplot(mesh.elements, mesh.nodes(:,1), mesh.nodes(:,2), 'k-');
+    title([title_str, ' - Mesh']);
+    xlabel('x'); ylabel('y');
+    axis equal;
+    
+    sgtitle(title_str);
+end
+
+function plot_convergence(errors)
+
+    figure;
+    loglog(errors.h, errors.L2, 'bo-', 'LineWidth', 2, 'MarkerSize', 8);
+    hold on;
+    loglog(errors.h, errors.H1, 'rs-', 'LineWidth', 2, 'MarkerSize', 8);
+
+    h_ref = linspace(min(errors.h), max(errors.h), 10);
+    plot(h_ref, h_ref.^2, 'k--', 'DisplayName', 'O(h^2)');
+    plot(h_ref, h_ref, 'k:', 'DisplayName', 'O(h)');
+    
+    xlabel('Mesh size h');
+    ylabel('Error');
+    title('Convergence Analysis');
+    legend('L^2 Error', 'H^1 Error', 'Location', 'best');
+    grid on;
+
+    for i = 2:length(errors.h)
+        rate_L2 = log(errors.L2(i-1)/errors.L2(i)) / log(errors.h(i-1)/errors.h(i));
+        text(errors.h(i), errors.L2(i), sprintf('%.2f', rate_L2), ...
+            'VerticalAlignment', 'top', 'HorizontalAlignment', 'left');
     end
 end
