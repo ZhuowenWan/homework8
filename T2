@@ -53,3 +53,60 @@ function [f, g_D, g_N] = compute_manufactured_solution(u_exact, R)
     
     f = f_handle;
 end
+
+function [L2_err, H1_err] = compute_errors(u_numeric, u_exact, mesh)
+    
+    L2_sq = 0;
+    H1_sq = 0;
+
+    for elem_idx = 1:size(mesh.elements, 1)
+        elem_nodes = mesh.elements(elem_idx, :);
+        node_coords = mesh.nodes(elem_nodes, :);
+
+        u_elem = u_numeric(elem_nodes);
+        u_exact_vals = arrayfun(@(i) u_exact(node_coords(i,1), node_coords(i,2)), 1:3);
+
+        [quad_points, quad_weights] = get_triangle_quadrature(4); % 4点积分
+        
+        for q = 1:length(quad_weights)
+            xi = quad_points(q, 1);
+            eta = quad_points(q, 2);
+
+            phi = [1-xi-eta, xi, eta];
+
+            u_num_q = phi * u_elem;
+
+            x_q = phi * node_coords(:,1);
+            y_q = phi * node_coords(:,2);
+            u_exact_q = u_exact(x_q, y_q);
+
+            [~, detJ] = compute_jacobian(node_coords, 'P1');
+
+            L2_sq = L2_sq + quad_weights(q) * (u_num_q - u_exact_q)^2 * detJ;
+        end
+    end
+    
+    L2_err = sqrt(L2_sq);
+    % H1_err = sqrt(H1_sq); 
+    H1_err = 0;
+end
+
+function compute_convergence_rates(errors)
+    
+    fprintf('\n=== Convergence Analysis ===\n');
+    fprintf('Mesh Size (h)\tL2 Error\tRate\tH1 Error\tRate\n');
+    fprintf('------------------------------------------------\n');
+    
+    for i = 1:length(errors.h)
+        if i == 1
+            rate_L2 = NaN;
+            rate_H1 = NaN;
+        else
+            rate_L2 = log(errors.L2(i-1)/errors.L2(i)) / log(errors.h(i-1)/errors.h(i));
+            rate_H1 = log(errors.H1(i-1)/errors.H1(i)) / log(errors.h(i-1)/errors.h(i));
+        end
+        
+        fprintf('%.4e\t%.4e\t%.2f\t%.4e\t%.2f\n', ...
+            errors.h(i), errors.L2(i), rate_L2, errors.H1(i), rate_H1);
+    end
+end
