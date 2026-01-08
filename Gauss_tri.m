@@ -319,4 +319,16 @@ quadrature_schemes = struct();
     QUADRATURE_CACHE = containers.Map('KeyType', 'double', 'ValueType', 'any');
  end
 
+ if QUADRATURE_CACHE.isKey(num_points)
+     cached = QUADRATURE_CACHE(num_points);
+     xi = cached.xi;
+     eta = cached.eta;
+     weights = cached.weights;
+     return;
+ end
+
+ QUADRATURE_CACHE(num_points) = struct(...
+    'xi', xi, 'eta', eta, 'weights', weights);
+ end
+
 end
