@@ -278,7 +278,7 @@ eta = qp(:,2);
 
 quadrature_schemes = struct();
 
-switch num_points
+ switch num_points
     case 3
         quadrature_schemes.center_points = [];
         quadrature_schemes.symmetric_groups = {...
@@ -296,20 +296,27 @@ switch num_points
         };
         quadrature_schemes.general_groups = {};
 
-for k = 1:3
-    idx = idx + 1;
-    if k == 1
-        qp(idx,:) = [a, b, b];
-    elseif k == 2
-        qp(idx,:) = [b, a, b];
-    else
-        qp(idx,:) = [b, b, a];
-    end
-    qw(idx) = w;
-end
+ for k = 1:3
+     idx = idx + 1;
+     if k == 1
+         qp(idx,:) = [a, b, b];
+     elseif k == 2
+         qp(idx,:) = [b, a, b];
+     else
+         qp(idx,:) = [b, b, a];
+     end
+     qw(idx) = w;
+ end
 
-qp(idx+1:idx+3, :) = [a, b, b; b, a, b; b, b, a];
-qw(idx+1:idx+3) = w;
-idx = idx + 3;
+ qp(idx+1:idx+3, :) = [a, b, b; b, a, b; b, b, a];
+ qw(idx+1:idx+3) = w;
+ idx = idx + 3;
+
+ function [xi, eta, weights] = Gauss_tri(num_points)
+ persistent QUADRATURE_CACHE;
+
+ if isempty(QUADRATURE_CACHE)
+    QUADRATURE_CACHE = containers.Map('KeyType', 'double', 'ValueType', 'any');
+ end
 
 end
