@@ -331,4 +331,16 @@ quadrature_schemes = struct();
     'xi', xi, 'eta', eta, 'weights', weights);
  end
 
+ function [xi, eta, weights, info] = Gauss_tri(num_points)
+ info = struct();
+ info.degree = get_polynomial_degree(num_points);
+ info.area = 0.5;  % 参考三角形面积
+ info.jacobian_factor = 0.5;
+ info.citation = 'Dunavant (1985)';
+
+ quad_scheme.xi = xi;
+ quad_scheme.eta = eta;
+ quad_scheme.weights = weights;
+ quad_scheme.properties = info;
+
 end
