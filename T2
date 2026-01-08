@@ -1,0 +1,55 @@
+function run_verification_disk()
+    
+    R = 1.0;  % 半径
+    center = [0, 0];
+    
+    % 制造解：u_exact = sin(πr²/R²)
+    u_exact = @(x,y) sin(pi*(x.^2 + y.^2)/R^2);
+    
+    [f, g_D, g_N] = compute_manufactured_solution(u_exact, R);
+
+    mesh_files = {'disk_coarse.msh', 'disk_medium.msh', 'disk_fine.msh'};
+
+    errors = struct();
+    errors.h = [];
+    errors.L2 = [];
+    errors.H1 = [];
+
+    for i = 1:length(mesh_files)
+        fprintf('Solving on mesh %d/%d: %s\n', i, length(mesh_files), mesh_files{i});
+
+        mesh = read_mesh(mesh_files{i});
+
+        [u, mesh, info] = solve_poisson_2D(mesh_files{i}, f, g_D, g_N, ...
+            'ElementType', 'P1', 'SolverType', 'direct');
+
+        [L2_err, H1_err] = compute_errors(u, u_exact, mesh);
+
+        errors.h = [errors.h; info.h_max];
+        errors.L2 = [errors.L2; L2_err];
+        errors.H1 = [errors.H1; H1_err];
+
+        visualize_solution(u, mesh, sprintf('Solution on Mesh %d', i));
+    end
+
+    compute_convergence_rates(errors);
+
+    plot_convergence(errors);
+end
+
+function [f, g_D, g_N] = compute_manufactured_solution(u_exact, R)
+
+    syms x y real
+    u_sym = sin(pi*(x^2 + y^2)/R^2);
+
+    laplacian_u = diff(u_sym, x, 2) + diff(u_sym, y, 2);
+
+    u_exact_handle = matlabFunction(u_sym, 'Vars', [x, y]);
+    f_handle = matlabFunction(-laplacian_u, 'Vars', [x, y]);  % -∇²u = f
+
+    g_D = u_exact_handle;  % u = u_exact on boundary
+
+    g_N = @(x,y) 0;
+    
+    f = f_handle;
+end
