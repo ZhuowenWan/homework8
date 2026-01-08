@@ -276,4 +276,24 @@ qw  = 0.5 * qw;
 xi  = qp(:,1);
 eta = qp(:,2);
 
+quadrature_schemes = struct();
+
+switch num_points
+    case 3
+        quadrature_schemes.center_points = [];
+        quadrature_schemes.symmetric_groups = {...
+            struct('type', 'symmetric3', 'a', 0.5, 'b', 0.5, 'weight', 1/3);
+        };
+        quadrature_schemes.general_groups = {};
+        
+    case 6
+        quadrature_schemes.center_points = [];
+        quadrature_schemes.symmetric_groups = {
+            struct('type', 'symmetric3', 'a', 0.816847572980459, ...
+                   'b', 0.091576213509771, 'weight', 0.109951743655322);
+            struct('type', 'symmetric3', 'a', 0.108103018168070, ...
+                   'b', 0.445948490915965, 'weight', 0.223381589678011);
+        };
+        quadrature_schemes.general_groups = {};
+
 end
