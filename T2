@@ -178,3 +178,22 @@ function test_general_bc()
     fprintf('\n4. Disk geometry verification:\n');
     run_verification_disk();
 end
+
+function test_pure_dirichlet()
+
+    u_exact = @(x,y) x.^2 + y.^2;
+
+    syms x y
+    u_sym = x^2 + y^2;
+    laplacian_u = diff(u_sym, x, 2) + diff(u_sym, y, 2);
+    f = matlabFunction(-laplacian_u);
+
+    g_D = u_exact;
+    g_N = @(x,y) 0;
+
+    [u, mesh, info] = solve_poisson_2D('square.msh', f, g_D, g_N);
+
+    [L2_err, H1_err] = compute_errors(u, u_exact, mesh);
+    fprintf('  L2 Error: %.4e\n', L2_err);
+    fprintf('  H1 Error: %.4e\n', H1_err);
+end
