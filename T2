@@ -161,3 +161,20 @@ function plot_convergence(errors)
             'VerticalAlignment', 'top', 'HorizontalAlignment', 'left');
     end
 end
+
+function test_general_bc()
+    
+    fprintf('Testing general boundary conditions...\n');
+
+    fprintf('\n1. Pure Dirichlet BC:\n');
+    test_pure_dirichlet();
+
+    fprintf('\n2. Pure Neumann BC:\n');
+    test_pure_neumann();
+
+    fprintf('\n3. Mixed BC:\n');
+    test_mixed_bc();
+    
+    fprintf('\n4. Disk geometry verification:\n');
+    run_verification_disk();
+end
